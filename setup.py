@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 
 setup(name="static-future",
-      version="0.0.2",
+      version="0.1.0",
       author="Ellis Percival",
       author_email="static-future@failcode.co.uk",
       description="Static analysis tool to establish which __future__ imports "
