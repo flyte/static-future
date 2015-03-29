@@ -2,7 +2,7 @@ import __future__
 import textwrap
 import unittest
 
-from static_future import compiler_flags
+from static_future.analysis import compiler_flags
 
 
 class FutureImportTest(unittest.TestCase):

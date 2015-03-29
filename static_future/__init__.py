@@ -1,3 +1,3 @@
-from .analysis import compiler_flags
+from .analysis import future_imports, features, compiler_flags
 
-__all__ = (compiler_flags,)
+__all__ = (future_imports, features, compiler_flags)
