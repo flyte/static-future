@@ -7,11 +7,9 @@ except ImportError:
     from io import StringIO
 
 
-def compiler_flags(unformatted_source):
+def future_imports(code):
     """
-    Establish which features have been imported from __future__
-    and return an integer value suitable for use in the compile()
-    'flags' parameter.
+    Return the names of all features imported from __future__.
     """
     def get_all_imports(tokens, last_was_name=False):
         """
@@ -31,10 +29,7 @@ def compiler_flags(unformatted_source):
             else:
                 last_was_name = False
 
-    flags = 0
-    tokens = tokenize.generate_tokens(
-        StringIO(unformatted_source).readline)
-    imports = []
+    tokens = tokenize.generate_tokens(StringIO(code).readline)
     try:
         while True:
             # from __future__ import has to be the first statement in a file
@@ -42,7 +37,8 @@ def compiler_flags(unformatted_source):
             first_three_tokens = " ".join(
                 (next(tokens)[1], next(tokens)[1], next(tokens)[1]))
             if first_three_tokens == "from __future__ import":
-                imports += get_all_imports(tokens)
+                for imp in get_all_imports(tokens):
+                    yield imp
             else:
                 # Keep popping tokens until the end of the _logical_ line
                 # https://docs.python.org/2/library/tokenize.html#tokenize.NL
@@ -54,7 +50,23 @@ def compiler_flags(unformatted_source):
         # We reached the end of the file
         pass
 
-    for imp in imports:
+
+def features(code):
+    """
+    Take the output from future_imports() and resolve the feature names to
+    _Feature objects.
+    """
+    for imp in future_imports(code):
         if imp in __future__.all_feature_names:
-            flags |= getattr(__future__, imp).compiler_flag
+            yield getattr(__future__, imp)
+
+
+def compiler_flags(code):
+    """
+    Return an integer for use in compile()'s flags parameter based on which
+    features have been imported from __future__.
+    """
+    flags = 0
+    for feature in features(code):
+        flags |= feature.compiler_flag
     return flags
